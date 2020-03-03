@@ -1,7 +1,9 @@
-from datetime import datetime as dt
+import re
+from collections import defaultdict
 
 
 def parse_result(datum):
+    """Parse result as a dict."""
     res = datum['resultat']
     return {
         'num_yes':       res['jaStimmenAbsolut'],
@@ -23,14 +25,8 @@ def parse_url(data, date):
     return None
 
 
-def parse_metadata(data):
+def parse_metadata(data, url):
     """Parse vote metadata."""
-    def parse_vote_day(data):
-        return dt.strptime(data['abstimmtag'], '%Y%m%d')
-
-    def parse_vote_last_modified(data):
-        return dt.strptime(data['timestamp'], '%Y-%m-%dT%H:%M:%S')
-
     def parse_titles(datum):
         titles = dict()
         for title in datum['vorlagenTitel']:
@@ -50,8 +46,8 @@ def parse_metadata(data):
         }
 
     # Parse common metadata.
-    last_modified = parse_vote_last_modified(data)
-    vote_day = parse_vote_day(data)
+    last_modified = data['timestamp']
+    vote_day = re.sub(r'(\d{4})(\d\d)(\d\d)', r'\1-\2-\3', data['abstimmtag'])
     # Parse each vote specific metadata.
     metadata = list()
     for datum in data['schweiz']['vorlagen']:
@@ -59,6 +55,7 @@ def parse_metadata(data):
             'ogd_id':           datum['vorlagenId'],
             'vote_day':         vote_day,
             'last_modified':    last_modified,
+            'url':              url,
             'accepted':         datum['vorlageAngenommen'],
             'double_majority':  datum['doppeltesMehr'],
             'is_final':         datum['vorlageBeendet'],
@@ -69,3 +66,38 @@ def parse_metadata(data):
         d.update(parse_result(datum))
         metadata.append(d)
     return metadata
+
+
+def parse_results(data, level):
+    def parse_datum(datum):
+        d = dict()
+        d = parse_result(datum)
+        d['ogd_id'] = datum['geoLevelnummer']
+        d['name'] = datum['geoLevelname']
+        return d
+
+    # Case canton.
+    if level == 'canton':
+        key = None
+    # Case districts.
+    elif level == 'district':
+        key = 'bezirke'
+    # Case Zurich's counting districts.
+    elif level == 'counting_district':
+        key = 'zaehlkreise'
+    # Case municipalities.
+    elif level == 'municipality':
+        key = 'gemeinden'
+
+    # Parse results for corresponding geographical level.
+    results = defaultdict(list)
+    for vote in data['schweiz']['vorlagen']:
+        ogd = vote['vorlagenId']
+        for canton in vote['kantone']:
+            # If the level is (counting) district or municipality.
+            if key is not None:
+                for datum in canton.get(key, []):
+                    results[ogd].append(parse_datum(datum))
+            else:
+                results[ogd].append(parse_datum(canton))
+    return dict(results)
