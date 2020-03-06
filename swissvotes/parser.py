@@ -17,14 +17,6 @@ def parse_result(datum):
     }
 
 
-def parse_url(data, date):
-    """Parse vote URL for given date."""
-    for datum in data['result']['resources']:
-        if datum['coverage'] == date:
-            return datum['download_url']
-    return None
-
-
 def parse_metadata(data, url):
     """Parse vote metadata."""
     def parse_titles(datum):
@@ -52,7 +44,7 @@ def parse_metadata(data, url):
     metadata = list()
     for datum in data['schweiz']['vorlagen']:
         d = {
-            'ogd_id':           datum['vorlagenId'],
+            'ogd_id':           int(datum['vorlagenId']),
             'vote_day':         vote_day,
             'last_modified':    last_modified,
             'url':              url,
@@ -69,11 +61,14 @@ def parse_metadata(data, url):
 
 
 def parse_results(data, level):
-    def parse_datum(datum):
-        d = dict()
+    """Parse results at a given geographical level."""
+    def parse_datum(datum, canton=None):
         d = parse_result(datum)
-        d['ogd_id'] = datum['geoLevelnummer']
+        d['ogd_id'] = int(datum['geoLevelnummer'])
         d['name'] = datum['geoLevelname']
+        d['timestamp'] = timestamp
+        if canton:
+            d['canton'] = canton['geoLevelname']
         return d
 
     # Case canton.
@@ -88,16 +83,28 @@ def parse_results(data, level):
     # Case municipalities.
     elif level == 'municipality':
         key = 'gemeinden'
+    elif level == 'municipality+zhdistrict':
+        key = ['gemeinden', 'zaehlkreise']
 
+    timestamp = data['timestamp'].replace('T', ' ')  # Parse timestamp.
     # Parse results for corresponding geographical level.
     results = defaultdict(list)
     for vote in data['schweiz']['vorlagen']:
         ogd = vote['vorlagenId']
         for canton in vote['kantone']:
+            # If the level is canton.
+            if key is None:
+                res = parse_datum(canton)
+                results[ogd].append(res)
+            # If the level is municipality AND counting districts.
+            elif type(key) is list:
+                for k in key:
+                    for datum in canton.get(k, []):
+                        res = parse_datum(datum, canton)
+                        results[ogd].append(res)
             # If the level is (counting) district or municipality.
-            if key is not None:
-                for datum in canton.get(key, []):
-                    results[ogd].append(parse_datum(datum))
             else:
-                results[ogd].append(parse_datum(canton))
+                for datum in canton.get(key, []):
+                    res = parse_datum(datum, canton)
+                    results[ogd].append(res)
     return dict(results)
