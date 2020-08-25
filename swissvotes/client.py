@@ -17,7 +17,8 @@ class Client:
         """
         data = self._get_json(VOTES_METADATA_URL, file)
         return {d['coverage']: d['download_url']
-                for d in data['result']['resources']}
+                for d in data['result']['resources']
+                if d['format'] != 'topojson'}
 
     def get_vote_metadata(self, url, file=None):
         """Get vote metadata from its URL. Optionally save JSON to file.
