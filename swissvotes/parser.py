@@ -73,7 +73,7 @@ def parse_results(data, level):
 
     # Case canton.
     if level == 'canton':
-        key = None
+        key = 'canton'
     # Case districts.
     elif level == 'district':
         key = 'bezirke'
@@ -93,7 +93,7 @@ def parse_results(data, level):
         ogd = vote['vorlagenId']
         for canton in vote['kantone']:
             # If the level is canton.
-            if key is None:
+            if key == 'canton':
                 res = parse_datum(canton)
                 results[ogd].append(res)
             # If the level is municipality AND counting districts.
