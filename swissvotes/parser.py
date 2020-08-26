@@ -78,7 +78,7 @@ def parse_results(data, level):
     elif level == 'district':
         key = 'bezirke'
     # Case Zurich's counting districts.
-    elif level == 'counting_district':
+    elif level == 'zhdistrict':
         key = 'zaehlkreise'
     # Case municipalities.
     elif level == 'municipality':
