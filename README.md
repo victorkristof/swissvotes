@@ -1,5 +1,7 @@
 # swissvotes
-*Scrape Swiss referendum vote results from [opendata.swiss](https://opendata.swiss/en/)*
+*Scrape [Swiss referendum vote results](https://opendata.swiss/en/dataset/echtzeitdaten-am-abstimmungstag-zu-eidgenoessischen-abstimmungsvorlagen) from [opendata.swiss](https://opendata.swiss/en/)*
+
+This is an unofficial scraper developped to power the website [Predikon.ch](http://www.predikon.ch), which provides real-time prediction of referendum results.
 
 ## Installation
 
@@ -13,7 +15,7 @@ pip install .
 
 ## Usage
 
-The library provides a client to [opendata.swiss](https://opendata.swiss/en/):
+The library provides a client to [opendata.swiss's real-time referendum vote results](https://opendata.swiss/en/dataset/echtzeitdaten-am-abstimmungstag-zu-eidgenoessischen-abstimmungsvorlagen):
 ~~~python
 from swissvotes import Client
 
