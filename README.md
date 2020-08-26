@@ -15,12 +15,16 @@ pip install .
 
 ## Usage
 
+### Initialize the client
+
 The library provides a client to [opendata.swiss's real-time referendum vote results](https://opendata.swiss/en/dataset/echtzeitdaten-am-abstimmungstag-zu-eidgenoessischen-abstimmungsvorlagen):
 ~~~python
 from swissvotes import Client
 
 client = Client()
 ~~~
+
+### Get the vote URLs
 
 The client enables you to query the API.
 Usually, you would start by fetching the vote URLs as a dictionary `{date: url}`
@@ -30,12 +34,16 @@ url = urls['2020-02-09']
 # url --> https://www.bfs.admin.ch/bfsstatic/dam/assets/11708082/master
 ~~~
 
+### Get the vote metadata
+
 You can retrieve the votes' metadata for a given URL by calling:
 ~~~python
 metadata = client.get_vote_metadata(url)
 # metadata --> list of dict
 ~~~
 Each dictionary in `metadata` contains details about the votes (identified uniquely by the `ogd_id` key).
+
+### Get the vote results
 
 Finally, you can scrape the results at a given URL by doing:
 ~~~python
@@ -53,6 +61,6 @@ It accepts the following keys:
 - `municipality+zhdistrict`: results in the municipalities and the counting districts
 The last key is useful to have a finer level of granularity of the results in Zurich and Winterthur, two the largest municipalities in Switzerland (the results in the counting districts are released sequentially as soon as they are available, whereas the aggregate results in the whole municipality is released much later).
 
-## Download Raw Data
+### Save the raw data
 
 The two methods `client.get_vote_metadata(...)` and `client.get_results(...)` optionally takes an argument `file='path/to/data.json'`, which enables you to save the raw JSON data to the given path.
