@@ -7,7 +7,7 @@ This is an unofficial scraper developped to power the website [Predikon.ch](http
 
 Clone the repo and install the library:
 ~~~bash
-git clone git@github.com:victorkristof/swissvotes.git
+git clone https://github.com/victorkristof/swissvotes.git
 cd swissvotes
 pip install -r requirements.txt
 pip install .
