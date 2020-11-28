@@ -21,7 +21,7 @@ pip install .
 
 The library provides a client to [opendata.swiss's real-time referendum vote results](https://opendata.swiss/en/dataset/echtzeitdaten-am-abstimmungstag-zu-eidgenoessischen-abstimmungsvorlagen):
 
-````python
+```python
 from swissvotes import Client
 
 client = Client()
@@ -73,4 +73,18 @@ It accepts the following keys:
 ### Save the raw data
 
 The two methods `client.get_vote_metadata(...)` and `client.get_results(...)` optionally takes an argument `file='path/to/data.json'`, which enables you to save the raw JSON data to the given path.
-````
+
+### Process raw data
+
+You can then process the raw JSON by using the `Parser` class:
+
+```python
+import json
+from swissvotes import Parser
+
+with open('path/to/data.json') as f:
+    data = json.load(f)
+
+parser = Parser()
+results = parser.parse_results(data, level='municipality')
+```
